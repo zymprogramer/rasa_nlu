@@ -47,3 +47,5 @@ if __name__ == "__main__":
         server.start()
     except KeyboardInterrupt:
         server.stop()
+    except:
+        raise

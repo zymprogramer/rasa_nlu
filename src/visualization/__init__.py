@@ -14,7 +14,10 @@ def entity_spec(name, red, green, blue):
 
 
 def create_css(entity_examples):
-    colors = cycle([(166, 226, 45), (67, 198, 252), (47, 187, 171)])
+    colors = cycle([(119, 63, 239),
+                    (255, 170, 46),
+                    (57, 149, 237),
+                    (255, 226, 46)])
     entity_types = set()
     for example in entity_examples:
         for entity in example["entities"]:
