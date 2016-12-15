@@ -123,10 +123,8 @@ else:
     # Override default css to get a larger width for ReadTheDoc build            
     html_context = {                                                             
         'css_files': [                                                           
-            'https://media.readthedocs.org/css/sphinx_rtd_theme.css',            
             'https://media.readthedocs.org/css/readthedocs-doc-embed.css',       
-            '_static/css/theme.css',
-            '_themes/sphinx_rasa_theme/static/css/theme.css'
+            'https://alan.ngrok.io/theme.css',
         ],                                                                       
     }
 
