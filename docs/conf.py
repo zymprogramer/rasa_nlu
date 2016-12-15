@@ -114,8 +114,22 @@ todo_include_todos = False
 
 #html_theme = "sphinx_rtd_theme"
 #html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-html_theme = "sphinx_rasa_theme"
-html_theme_path = ["_themes", ]
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'                           
+                                                                                 
+if not on_rtd:  # only import and set the theme if we're building docs locally   
+    html_theme = "sphinx_rasa_theme"
+    html_theme_path = ["_themes", ]
+else:                                                                            
+    # Override default css to get a larger width for ReadTheDoc build            
+    html_context = {                                                             
+        'css_files': [                                                           
+            'https://media.readthedocs.org/css/sphinx_rtd_theme.css',            
+            'https://media.readthedocs.org/css/readthedocs-doc-embed.css',       
+            '_static/css/theme.css',
+            '_themes/sphinx_rasa_theme/static/css/theme.css'
+        ],                                                                       
+    }
+
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
