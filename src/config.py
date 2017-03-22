@@ -4,29 +4,41 @@ import os
 import logging
 
 
+# Describes where to search for the configuration file if the location is not set by the user
+from rasa_nlu.utils.mitie import MITIE_BACKEND_NAME
+
+DEFAULT_CONFIG_LOCATION = "config.json"
+
+
 class RasaNLUConfig(object):
 
     def __init__(self, filename=None, env_vars=None, cmdline_args=None):
 
         defaults = {
           "backend": "mitie",
-          "config": "config.json",
+          "config": DEFAULT_CONFIG_LOCATION,
           "data": None,
           "emulate": None,
           "language": "en",
           "log_file": None,
           "log_level": logging.INFO,
-          "mitie_file": "./data/total_word_feature_extractor.dat",
-          "path": os.getcwd(),
+          "mitie_file": os.path.join("data", "total_word_feature_extractor.dat"),
+          "num_threads": 1,
+          "fine_tune_spacy_ner": False,
+          "path": os.path.join(os.getcwd(), "models"),
           "port": 5000,
-          "server_model_dir": None,
+          "server_model_dirs": None,
           "token": None,
-          "write": os.path.join(os.getcwd(), "rasa_nlu_log.json")
+          "response_log": os.path.join(os.getcwd(), "logs")
         }
+
+        if filename is None and os.path.isfile(DEFAULT_CONFIG_LOCATION):
+            filename = DEFAULT_CONFIG_LOCATION
 
         self.override(defaults)
         if filename is not None:
-            file_config = json.loads(codecs.open(filename, encoding='utf-8').read())
+            with codecs.open(filename, encoding='utf-8') as f:
+                file_config = json.loads(f.read())
             self.override(file_config)
 
         if env_vars is not None:
@@ -74,8 +86,6 @@ class RasaNLUConfig(object):
         self.__dict__.update(new_dict)
 
     def validate(self):
-        if self.backend == "mitie":
+        if self.backend == MITIE_BACKEND_NAME:
             if not self.is_set("mitie_file"):
                 raise ValueError("backend set to 'mitie' but mitie_file not specified")
-            if self.language != "en":
-                raise ValueError("backend set to 'mitie' but language not set to 'en'.")

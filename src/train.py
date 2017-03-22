@@ -1,10 +1,9 @@
 import argparse
-from training_data import TrainingData
-from config import RasaNLUConfig
-import json
-import warnings
-import os
 import logging
+import os
+
+from rasa_nlu.config import RasaNLUConfig
+from rasa_nlu.training_data import TrainingData
 
 
 def create_argparser():
@@ -16,8 +15,10 @@ def create_argparser():
     parser.add_argument('-p', '--path', default=None, help="path where model files will be saved")
     parser.add_argument('-d', '--data', default=None, help="file containing training data")
     parser.add_argument('-c', '--config', required=True, help="config file")
-    parser.add_argument('-l', '--language', default='en', choices=['de', 'en'], help="model and data language")
-    parser.add_argument('-m', '--mitie_file', default='data/total_word_feature_extractor.dat',
+    parser.add_argument('-l', '--language', default=None, choices=['de', 'en'], help="model and data language")
+    parser.add_argument('-t', '--num_threads', default=1, type=int,
+                        help="number of threads to use during model training")
+    parser.add_argument('-m', '--mitie_file', default=None,
                         help='file with mitie total_word_feature_extractor')
     return parser
 
@@ -26,10 +27,13 @@ def create_trainer(config):
     backend = config.backend.lower()
     if backend == 'mitie':
         from trainers.mitie_trainer import MITIETrainer
-        return MITIETrainer(config.mitie_file, config.language)
+        return MITIETrainer(config.mitie_file, config.language, config.num_threads)
+    if backend == 'mitie_sklearn':
+        from trainers.mitie_sklearn_trainer import MITIESklearnTrainer
+        return MITIESklearnTrainer(config.mitie_file, config.language, config.num_threads)
     if backend == 'spacy_sklearn':
         from trainers.spacy_sklearn_trainer import SpacySklearnTrainer
-        return SpacySklearnTrainer(config.language)
+        return SpacySklearnTrainer(config.language, config.num_threads, config.fine_tune_spacy_ner)
     else:
         raise NotImplementedError("other backend trainers not implemented yet")
 
@@ -51,13 +55,16 @@ def init():
 
 
 def do_train(config):
+    """Loads the trainer and the data and runs the training of the specified model."""
+
     trainer = create_trainer(config)
 
     persistor = create_persistor(config)
 
-    training_data = TrainingData(config.data, config.backend, config.language)
+    training_data = TrainingData(config.data, config.backend, nlp=trainer.nlp)
     trainer.train(training_data)
-    trainer.persist(config.path, persistor)
+    persited_path = trainer.persist(config.path, persistor)
+    return trainer, persited_path
 
 
 if __name__ == '__main__':

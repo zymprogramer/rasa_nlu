@@ -1,39 +1,65 @@
 # rasa NLU
+[![Join the chat at https://gitter.im/golastmile/rasa_nlu](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/golastmile/rasa_nlu?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/golastmile/rasa_nlu.svg?branch=master)](https://travis-ci.org/golastmile/rasa_nlu)
 [![Coverage Status](https://coveralls.io/repos/github/golastmile/rasa_nlu/badge.svg?branch=master)](https://coveralls.io/github/golastmile/rasa_nlu?branch=master)
-[![Documentation Status](https://readthedocs.org/projects/rasa-nlu/badge/?version=latest)](http://rasa-nlu.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/rasa-nlu/badge/)](https://rasa-nlu.readthedocs.io/en/latest/)
 
-documentation is [here](http://rasa-nlu.readthedocs.io/)
-homepage is here [here](https://rasa.ai/)
+Find the [extended documentation here](http://rasa-nlu.readthedocs.io/), or find out more on the [homepage of the project](https://rasa.ai/), where you can also sign up for the mailing list.
 
 
-## Motivation
+## FAQ
+### What is this?
+rasa NLU (Natural Language Understanding) is a tool for intent classification and entity extraction. You can think of rasa NLU as a set of high level APIs for building your own language parser using existing NLP and ML libraries.
 
-rasa NLU is a tool for intent classification and entity extraction. 
-You can think of rasa NLU as a set of high level APIs for building your own language parser using existing NLP and ML libraries.
-The intended audience is mainly people developing bots. 
-It can be used as a drop-in replacement for [wit](https://wit.ai) or [LUIS](https://luis.ai), but works as a local service rather than a web API. 
+### Who is it for?
+The intended audience is mainly __people developing bots__, looking to find a a drop-in replacement for [wit](https://wit.ai), [LUIS](https://luis.ai), or [api.ai](https://api.ai). The setup process is designed to be as simple as possible. rasa NLU is written in Python, but you can use it from any language through a HTTP API. If your project is written in Python you can simply import the relevant classes. If you're currently using wit/LUIS/api.ai, you just:
 
-The setup process is designed to be as simple as possible. If you're currently using wit or LUIS, you just:
-1. download your app data from wit or LUIS and feed it into rasa NLU
-2. run rasa NLU on your machine and switch the URL of your wit/LUIS api calls to `localhost:5000/parse`.
+1. Download your app data from wit, LUIS, or api.ai and feed it into rasa NLU
+2. Run rasa NLU on your machine and switch the URL of your wit/LUIS api calls to `localhost:5000/parse`.
 
-Reasons you might use this over one of the aforementioned services: 
-- you don't have to hand over your data to FB/MSFT/GOOG
-- you don't have to make a `https` call every time.
-- you can tune models to work well on your particular use case.
+### Why should I use rasa NLU?
+* You don't have to hand over your data to FB/MSFT/GOOG
+* You don't have to make a `https` call to parse every message.
+* You can tune models to work well on your particular use case.
 
-These points are laid out in more detail in a [blog post](https://medium.com/lastmile-conversations/do-it-yourself-nlp-for-bot-developers-2e2da2817f3d).
+These points are laid out in more detail in a [blog post](https://medium.com/lastmile-conversations/do-it-yourself-nlp-for-bot-developers-2e2da2817f3d). rasa is a set of tools for building more advanced bots, developed by [LASTMILE](https://golastmile.com). rasa NLU is the natural language understanding module, and the first component to be open sourced. 
 
-rasa NLU is written in Python, but it you can use it from any language through a HTTP API. 
-If your project *is* written in Python you can simply import the relevant classes.
+### Why don't you have feature X?
+Check the issues here on GitHub, there might be someone else talking about the same thing. 
+If there isn't, please create a new issue, describe your use case, and the community can discuss how it could be implemented.
 
-rasa is a set of tools for building more advanced bots, developed by [LASTMILE](https://golastmile.com). This is the natural language understanding module, and the first component to be open sourced. 
+### What languages does it support?
+Short answer: English, German, and Spanish currently. 
+Longer answer: If you want to add a new language, the key things you need are a tokenizer and a set of word vectors. More information can be found in the [language documentation](https://rasa-nlu.readthedocs.io/en/latest/languages.html).
 
-### Deploying to Docker Cloud
+## Use
+### A. Install Locally
+```
+python setup.py install
+python -m rasa_nlu.server -e wit &
+curl 'http://localhost:5000/parse?q=hello'
+```
+
+### B. Install with Docker
+Before you start, ensure you have the latest version of docker engine on your machine. You can check if you have docker installed by typing ```docker -v``` in your terminal.
+
+#### 1. Build the image:
+```
+docker build -t rasa_nlu .
+``` 
+
+#### 2. Start the web server:
+```
+docker run -p 5000:5000 rasa_nlu start
+```
+
+#### 3. Test it!
+```
+curl 'http://localhost:5000/parse?q=hello'
+```
+
+### C. (Experimental) Deploying to Docker Cloud
 [![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/)
-
-**Experimental:** Click the button to deploy a rasa NLU server to Docker Cloud.
 
 
 ## License
