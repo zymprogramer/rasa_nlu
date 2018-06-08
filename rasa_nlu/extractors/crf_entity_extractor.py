@@ -15,6 +15,7 @@ from rasa_nlu.extractors import EntityExtractor
 from rasa_nlu.model import Metadata
 from rasa_nlu.training_data import Message
 from rasa_nlu.training_data import TrainingData
+import numpy as np
 
 try:
     import spacy
@@ -61,7 +62,11 @@ class CRFEntityExtractor(EntityExtractor):
         "L1_c": 0.1,
 
         # weight of the L2 regularization
-        "L2_c": 0.1
+        "L2_c": 0.1,
+
+        "worddrop_percentage":0.4,
+
+        "worddrop_on":False
     }
 
     function_dict = {
@@ -124,7 +129,6 @@ class CRFEntityExtractor(EntityExtractor):
         self.component_config = config.for_component(self.name, self.defaults)
 
         self._validate_configuration()
-
         # checks whether there is at least one
         # example with an entity annotation
         if training_data.entity_examples:
@@ -520,6 +524,29 @@ class CRFEntityExtractor(EntityExtractor):
             crf_format.append((token.text, tag, entity, pattern))
         return crf_format
 
+    def _worddrop_detagger(self, X_train, y_train, n_iters=3):
+        pairs = list(zip(X_train, y_train))
+        worddrop_probability = self.component_config.get("worddrop_probability")
+        X_new = []
+        for iter in range(n_iters):
+            for pair in pairs:
+                X, y = pair
+                X_mid = []
+                keep_arr = np.random.binomial(1, p=1-worddrop_probability, size=len(y))
+                for idx, x_sub in enumerate(X):
+                    if keep_arr[idx] == 0:
+                        x_sub = {key:value for key, value in x_sub.items() if not key.startswith("0:")}
+                        x_sub['0:bias'] = 'bias'
+                    if keep_arr[idx-1]==0 and idx!=0:
+                        x_sub = {key:value for key, value in x_sub.items() if not key.startswith("-1:")}
+                    if idx != len(X)-1:
+                        if keep_arr[idx+1]==0:
+                            x_sub = {key:value for key, value in x_sub.items() if not key.startswith("1:")}
+                    X_mid.append(x_sub)
+                X_new.append(X_mid)
+        y_new = y_train * n_iters
+        return X_new, y_new
+
     def _train_model(self, df_train):
         # type: (List[List[Tuple[Text, Text, Text, Text]]]) -> None
         """Train the crf tagger based on the training data."""
@@ -527,6 +554,9 @@ class CRFEntityExtractor(EntityExtractor):
 
         X_train = [self._sentence_to_features(sent) for sent in df_train]
         y_train = [self._sentence_to_labels(sent) for sent in df_train]
+
+        if self.component_config.get("worddrop_on") is True:
+            X_train, y_train = self._worddrop_detagger(X_train, y_train)
         self.ent_tagger = sklearn_crfsuite.CRF(
                 algorithm='lbfgs',
                 # coefficient for L1 penalty
