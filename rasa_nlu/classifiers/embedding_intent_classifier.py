@@ -586,9 +586,10 @@ class EmbeddingIntentClassifier(Component):
             oos_index = intent_dict[self.component_config["out_of_scope_intent"]]
             soft_threshold = self.component_config["out_of_scope_soft_threshold"]
 
-            message_sim[oos_index] = -math.inf
-            max_sim = message_sim.max()
-            message_sim[oos_index] = min(2 * soft_threshold - max_sim, 1.0)
+            # message_sim[oos_index] = -math.inf
+            # max_sim = message_sim.max()
+            # message_sim[oos_index] = min(2 * soft_threshold - max_sim, 1.0)
+            message_sim[oos_index] = -self.mu_neg + 0.1
 
         intent_ids = message_sim.argsort()[::-1]
         message_sim[::-1].sort()
