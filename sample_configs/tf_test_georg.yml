@@ -5,7 +5,7 @@ pipeline:
 - name: "intent_classifier_tensorflow_embedding"
   intent_tokenization_flag: true
   intent_split_symbol: "_"
-  out_of_scope_training_flag: True
+  out_of_scope_training_flag: true
   out_of_scope_intent: 'request_outofscope'
   out_of_scope_soft_threshold: 0.5
 
