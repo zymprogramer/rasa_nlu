@@ -412,6 +412,9 @@ class EmbeddingIntentClassifier(Component):
             logger.info("Accuracy is updated every {} epochs"
                         "".format(self.evaluate_every_num_epochs))
 
+        if True:
+            from sklearn.model_selection import train_test_split
+            X, X_val, Y, Y_val, intents_for_X, intents_for_X_val = train_test_split(X, Y, intents_for_X)
         pbar = tqdm(range(self.epochs), desc="Epochs")
         train_acc = 0
         last_loss = 0
@@ -446,11 +449,14 @@ class EmbeddingIntentClassifier(Component):
                         (ep + 1) == self.epochs):
                     train_acc = self._output_training_stat(X, intents_for_X,
                                                            is_training)
+                    valid_acc, valid_loss = self._output_training_stat(X_val, intents_for_X_val, is_training, loss=loss)
+                    print(valid_loss)
                     last_loss = ep_loss
 
                 pbar.set_postfix({
                     "loss": "{:.3f}".format(ep_loss),
-                    "acc": "{:.3f}".format(train_acc)
+                    "acc": "{:.3f}".format(train_acc),
+                    "valid": "{:.3f}".format(valid_acc)
                 })
             else:
                 pbar.set_postfix({
@@ -462,19 +468,25 @@ class EmbeddingIntentClassifier(Component):
                         "loss={:.3f}, train accuracy={:.3f}"
                         "".format(last_loss, train_acc))
 
-    def _output_training_stat(self, X, intents_for_X, is_training):
+    def _output_training_stat(self, X, intents_for_X, is_training, loss=None):
         """Output training statistics"""
         n = self.evaluate_on_num_examples
         ids = np.random.permutation(len(X))[:n]
         all_Y = self._create_all_Y(X[ids].shape[0])
-
+        feed_dict = {self.a_in: X[ids],
+                     self.b_in: all_Y,
+                     is_training: False}
         train_sim = self.session.run(self.sim_op,
-                                     feed_dict={self.a_in: X[ids],
-                                                self.b_in: all_Y,
-                                                is_training: False})
+                                     feed_dict=feed_dict)
+
 
         train_acc = np.mean(np.argmax(train_sim, -1) == intents_for_X[ids])
-        return train_acc
+        if loss is not None:
+            train_valid = self.session.run(loss, feed_dict=feed_dict)
+
+            return train_acc, train_valid
+        else:
+            return train_acc
 
     def train(self, training_data, cfg=None, **kwargs):
         # type: (TrainingData, Optional[RasaNLUModelConfig], **Any) -> None
