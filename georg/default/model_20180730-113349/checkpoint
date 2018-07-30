@@ -1,0 +1,2 @@
+model_checkpoint_path: "/Users/twh/Documents/RASA/rasa_nlu/./georg/default/model_20180730-113349/intent_classifier_tensorflow_embedding.ckpt"
+all_model_checkpoint_paths: "/Users/twh/Documents/RASA/rasa_nlu/./georg/default/model_20180730-113349/intent_classifier_tensorflow_embedding.ckpt"
