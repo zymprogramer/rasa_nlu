@@ -1,0 +1,10 @@
+language: "de"
+
+pipeline:
+- name: "intent_featurizer_count_vectors"
+- name: "intent_classifier_tensorflow_embedding"
+  embed_dim: 20
+  num_neg: 20
+  epochs: 200
+  out_of_scope_training_flag: true
+  out_of_scope_intent: request_outofscope
