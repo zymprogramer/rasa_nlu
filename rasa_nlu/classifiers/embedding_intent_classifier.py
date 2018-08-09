@@ -232,6 +232,12 @@ class EmbeddingIntentClassifier(Component):
         self.word_embed = word_embed
         self.intent_embed = intent_embed
 
+        logger.info("graph", self.graph)
+        if self.session:
+            logger.info("session graph", self.session.graph)
+        logger.info("session", self.session)
+
+
     # training data helpers:
     @staticmethod
     def _create_intent_dict(training_data):
@@ -406,6 +412,12 @@ class EmbeddingIntentClassifier(Component):
     def _train_tf(self, X, Y, intents_for_X,
                   loss, is_training, train_op):
         """Train tf graph"""
+
+        logger.info("graph", self.graph)
+        if self.session:
+            logger.info("session graph", self.session.graph)
+        logger.info("session", self.session)
+
         self.session.run(tf.global_variables_initializer())
 
         if self.evaluate_on_num_examples:
@@ -525,6 +537,11 @@ class EmbeddingIntentClassifier(Component):
             # train tensorflow graph
             self.session = tf.Session()
 
+            logger.info("graph", self.graph)
+            if self.session:
+                logger.info("session graph", self.session.graph)
+            logger.info("session", self.session)
+
             self._train_tf(X, Y, intents_for_X,
                            loss, is_training, train_op)
 
@@ -557,6 +574,11 @@ class EmbeddingIntentClassifier(Component):
 
         intent = {"name": None, "confidence": 0.0}
         intent_ranking = []
+
+        logger.info("graph", self.graph)
+        if self.session:
+            logger.info("session graph", self.session.graph)
+        logger.info("session", self.session)
 
         if self.session is None:
             logger.error("There is no trained tf.session: "
