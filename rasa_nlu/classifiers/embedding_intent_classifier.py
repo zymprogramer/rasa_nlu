@@ -667,6 +667,8 @@ class EmbeddingIntentClassifier(Component):
                 word_embed = tf.get_collection('word_embed')[0]
                 intent_embed = tf.get_collection('intent_embed')[0]
 
+            graph.finalize()
+
             with io.open(os.path.join(
                     model_dir,
                     cls.name + "_inv_intent_dict.pkl"), 'rb') as f:
